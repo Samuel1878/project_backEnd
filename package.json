@@ -6,12 +6,16 @@
   "type": "commonjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "tsinit": "tsc --init"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "chalk": "^5.3.0",
+    "node-gyp": "^9.4.0",
+    "node-gyp-build": "^4.6.0",
+    "node-gyp-build-optional-packages": "^5.1.0",
     "nodemon": "^2.0.22"
   },
   "dependencies": {
@@ -23,6 +27,8 @@
     "jsonwebtoken": "^9.0.0",
     "mongodb": "^5.6.0",
     "mongoose": "^7.3.1",
-    "socket.io": "^4.7.1"
+    "poker-ts": "^1.0.0",
+    "socket.io": "^4.7.1",
+    "typescript": "^5.1.6"
   }
 }
