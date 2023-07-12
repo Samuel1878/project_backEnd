@@ -1,4 +1,5 @@
-const chalk = require("chalk");
+import chalk from "chalk";
+
 const logger = {
     debug: (...arg) => {
       console.log(chalk.cyanBright(new Date().toISOString(), ':DEBUG:', ...arg));
@@ -13,5 +14,4 @@ const logger = {
         console.log(chalk.magenta((new Date()).toISOString(), "Tip: ", ...arg))
     }
   };
-  
-module.exports = logger;
+export default logger;
