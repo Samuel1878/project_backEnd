@@ -5,7 +5,7 @@ import bodyparser from "body-parser";
 import cors from "cors";
 import http from "http";
 import connectDB from "./config/database.js";
-import registerRouter from "./routes/register.js";
+import accountRouter from "./routes/account.js";
 import logger from "./log/logger.js";
 import socketServer from "./config/socket.js";
 
@@ -19,7 +19,7 @@ app.use(bodyparser.urlencoded({ extended: true }))
 app.use(bodyparser.json())
 app.use(express.json({extended:false}));
 app.use(cors())
-app.use("/api/register", registerRouter);
+app.use("/api/register", accountRouter);
 connectDB();
 socketServer(httpServer);
 
