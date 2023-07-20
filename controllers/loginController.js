@@ -15,7 +15,7 @@ const loginController = async(req,res,next) =>{
             token: generateToken(isUser._id),
           });
         } else {
-          res.json({code:401, message:"invalid Email or Password"});
+          res.json({code:401, message:"invalid phone or Password"});
         }
     }
 export default loginController;

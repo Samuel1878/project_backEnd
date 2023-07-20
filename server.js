@@ -19,7 +19,7 @@ app.use(bodyparser.urlencoded({ extended: true }))
 app.use(bodyparser.json())
 app.use(express.json({extended:false}));
 app.use(cors())
-app.use("/api/register", accountRouter);
+app.use("/api/account", accountRouter);
 connectDB();
 socketServer(httpServer);
 
