@@ -7,8 +7,8 @@ const loginController = async(req,res,next) =>{
         const isUser = await User.findOne({phone:phoneNo});
         if (isUser && (password === isUser.password)) {
           res.json({
-            chips: isUser.chips,
             token: generateToken(isUser._id),
+            code:201
           });
         } else {
           res.json({code:401, message:"invalid phone or Password"});
