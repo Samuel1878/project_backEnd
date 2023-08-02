@@ -7,10 +7,6 @@ const loginController = async(req,res,next) =>{
         const isUser = await User.findOne({phone:phoneNo});
         if (isUser && (password === isUser.password)) {
           res.json({
-            _id: isUser._id,
-            name: isUser.name,
-            email: isUser.email,
-            image: isUser.image,
             chips: isUser.chips,
             token: generateToken(isUser._id),
           });

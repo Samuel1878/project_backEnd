@@ -8,6 +8,7 @@ import connectDB from "./config/database.js";
 import accountRouter from "./routes/account.js";
 import logger from "./log/logger.js";
 import socketServer from "./config/socket.js";
+import userDataRouter from "./routes/userData.js";
 
 dotenv.config();
 const app = express();
@@ -20,6 +21,7 @@ app.use(bodyparser.json())
 app.use(express.json({extended:false}));
 app.use(cors())
 app.use("/api/account", accountRouter);
+app.use("/api/userData", userDataRouter)
 connectDB();
 socketServer(httpServer);
 

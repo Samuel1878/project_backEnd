@@ -5,5 +5,7 @@ const accountRouter = express.Router();
 
 accountRouter.post("/2faValidation", registerController.validationOTP);
 accountRouter.post("/createUser", registerController.createUser);
-accountRouter.post("/login", loginController)
+accountRouter.post("/login", loginController);
+
+
 export default accountRouter;
