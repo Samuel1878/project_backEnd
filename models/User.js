@@ -20,7 +20,7 @@ const register = new mongoose.Schema({
   },
   image: {
     type:String,
-    default:"./img/user.png",
+    default:null,
   }
 }, {
     timestamps:true
