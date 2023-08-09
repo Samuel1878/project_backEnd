@@ -7,6 +7,7 @@ import logger from "./log/logger.js";
 import socketServer from "./config/socket.js";
 import configRoutes from "./routes/index.js";
 import middleware from "./middleware/index.js";
+import init from "./data/pokerGame/socket/index.js";
 
 dotenv.config();
 const app = express();
@@ -21,16 +22,17 @@ configRoutes(app);
 (async function(){
   db = await connectDB();
 })()
-
-//handle real-time poker game logic with socket.io
-const io = socketServer(httpServer);
-io.on('connection', (socket)=> gameSocket.init)
-
 //start server and listen for connections
 httpServer.listen(process.env.PORT, (err) => {
   if (err) console.log(err);
   logger.info(`A server is runing at ${process.env.PORT}`);
 });
+
+//handle real-time poker game logic with socket.io
+const io = socketServer(httpServer);
+io.on('connection', (socket)=>init(socket, io) )
+
+
 //Error handling and close server
 process.on('unhandledRejection', (err)=>{
   db.disconnect();
