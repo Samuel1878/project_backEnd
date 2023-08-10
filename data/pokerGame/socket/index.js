@@ -26,9 +26,7 @@ import {
   WINNER,
 } from "../actions.js";
 import { decodeToken } from "../../../config/generateToken.js";
-const tables = {
-    1:new Table(1, 'Table 1', 10000),
-};
+const tables = {};
 const players = {};
 function getCurrentPlayers(){
   return Object.values(players).map((player)=> ({
@@ -78,14 +76,18 @@ const init = (socket, io)=>{
     }
   });
   socket.on(JOIN_TABLE, (tableId)=>{
-    const table = tables[tableId];
+    //////This 
+    const table = new Table(tableId, "table A", 10000)
     const player = players[socket.id];
+    
+
     table.addPlayer(player);
+
     socket.emit(TABLE_JOINED, {tables:getCurrentTables(),tableId});
     socket.broadcast.emit(TABLES_UPDATED, getCurrentTables());
     if(
-      table[tableId].players &&
-      table[tableId].players.length>0 &&
+      tables[tableId].players &&
+      tables[tableId].players.length>0 &&
       player
     ){
       let message =  `${player.name} joined the table`;

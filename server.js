@@ -30,7 +30,7 @@ httpServer.listen(process.env.PORT, (err) => {
 
 //handle real-time poker game logic with socket.io
 const io = socketServer(httpServer);
-io.on('connection', (socket)=>init(socket, io) )
+io.on('connection', (socket)=>{init(socket, io)});
 
 
 //Error handling and close server
