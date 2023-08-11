@@ -26,8 +26,21 @@ import {
   WINNER,
 } from "../actions.js";
 import { decodeToken } from "../../../config/generateToken.js";
-const tables = {};
+import Room from "../Room.js";
+const tables = {
+  1:new Table(1, 'Table 1', 10000)
+}
+const createNewTable = (id,socket,limit) => {
+  const room = new Room();
+  room.createTable(socket, id)
+  return{socket: new Table(id,`table ${socket}`, limit)}
+}
+function deleteTableFromRoom (id){
+  const room = new Room();
+  room.deleteTable(id);
+}
 const players = {};
+
 function getCurrentPlayers(){
   return Object.values(players).map((player)=> ({
     socketId: player.socketId,
@@ -36,15 +49,17 @@ function getCurrentPlayers(){
   }));
 }
 function getCurrentTables(){
-  return Object.values(tables).map((table)=>({
-    id:table.id,
-    name:table.name,
-    limit:table.limit,
-    maxPlayers:table.maxPlayers,
-    currentNumberPlayers: table.players.length,
-    smallBlind: table.minBet,
-    bigBlind: table.minBet *2,
-  }));
+
+  // return Object.values(tables).map((table)=>({
+  //   id:table.id,
+  //   name:table.name,
+  //   limit:table.limit,
+  //   maxPlayers:table.maxPlayers,
+  //   currentNumberPlayers: table.players.length,
+  //   smallBlind: table.minBet,
+  //   bigBlind: table.minBet *2,
+  // }));
+
 }
 const init = (socket, io)=>{
   socket.on(FETCH_LOBBY_INFO, async(token)=>{
@@ -77,7 +92,7 @@ const init = (socket, io)=>{
   });
   socket.on(JOIN_TABLE, (tableId)=>{
     //////This 
-    const table = new Table(tableId, "table A", 10000)
+    const table = tables[tableId]
     const player = players[socket.id];
     
 
