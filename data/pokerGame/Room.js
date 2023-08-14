@@ -1,15 +1,15 @@
-import logger from "../../log/logger";
+import logger from "../../log/logger.js";
 
 class Room {
     constructor(){
-        this.table = []
+        this.tables = []
     }
-    createTable(socketId, tableId) {
-        this.table.push({roomId:socketId, tableId:tableId})
+    createTable(socketId, table) {
+        this.tables.push({roomId:socketId, table:table})
     }
     deleteTable(tableId) {
-       this.table = this.table.filter((id)=>id.tableId !== tableId);
-       logger.debug(this.table)
+       this.tables = this.tables.filter((table)=>table.tableId !== tableId);
+       logger.debug(this.tables)
     }
 }
 export default Room

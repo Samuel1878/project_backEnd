@@ -19,5 +19,6 @@ export const STAND_UP = "STAND_UP";
 export const SITTING_OUT = "SITTING_OUT";
 export const SITTING_IN = "SITTING_IN";
 export const DISCONNECT = "DISCONNECT";
+export const CREATE_TABLE = "CREATE_TABLE";
 
 

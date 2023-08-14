@@ -24,23 +24,25 @@ import {
   DISCONNECT,
   TABLE_UPDATED,
   WINNER,
+  CREATE_TABLE,
 } from "../actions.js";
 import { decodeToken } from "../../../config/generateToken.js";
 import Room from "../Room.js";
-const tables = {
-  1:new Table(1, 'Table 1', 10000)
-}
+import logger from "../../../log/logger.js";
+const room = [];
+const players = {};
 const createNewTable = (id,socket,limit) => {
-  const room = new Room();
-  room.createTable(socket, id)
-  return{socket: new Table(id,`table ${socket}`, limit)}
+  const table = new Table(id,`table ${socket}`, limit);
+  // room.createTable(socket, table);
+  if(room.find((e)=>e.table.id === id)){
+   return console.log(`table ${id} already exit`)
+  }
+  room.push({roomId:socket, table:table});
+  logger.tip(room.length)
 }
 function deleteTableFromRoom (id){
-  const room = new Room();
-  room.deleteTable(id);
+  room = room.filter((e)=>e.table.id !== id)
 }
-const players = {};
-
 function getCurrentPlayers(){
   return Object.values(players).map((player)=> ({
     socketId: player.socketId,
@@ -48,8 +50,8 @@ function getCurrentPlayers(){
     name:player.name,
   }));
 }
-function getCurrentTables(){
-
+function getCurrentTables(tableId){
+  return room.filter((table)=>table.table.id === tableId)
   // return Object.values(tables).map((table)=>({
   //   id:table.id,
   //   name:table.name,
@@ -59,7 +61,17 @@ function getCurrentTables(){
   //   smallBlind: table.minBet,
   //   bigBlind: table.minBet *2,
   // }));
-
+}
+const getTable = (table) => {
+    return {
+      id: table.id,
+      name: table.name,
+      limit: table.limit,
+      maxPlayers: table.maxPlayers,
+      currentNumberPlayers: table.players.length,
+      smallBlind: table.minBet,
+      bigBlind: table.minBet *2,
+    };
 }
 const init = (socket, io)=>{
   socket.on(FETCH_LOBBY_INFO, async(token)=>{
@@ -70,7 +82,7 @@ const init = (socket, io)=>{
       });
       if(found){
         delete players[found.socketId];
-        Object.values(tables).map((table)=>{
+        room.map((table)=>{
           table.removePlayer(found.socketId);
           broadcastToTable(table);
         });
@@ -83,12 +95,31 @@ const init = (socket, io)=>{
         user.chips,
       );
       socket.emit(RECEIVE_LOBBY_INFO, {
-        tables: getCurrentTables(),
+        tables: room,
         players:getCurrentPlayers(),
         socketId: socket.id,
       });
       socket.broadcast.emit(PLAYERS_UPDATED, getCurrentPlayers())
     }
+  });
+  socket.on(CREATE_TABLE, ({tableId,limit})=>{
+      createNewTable(tableId, socket.id,limit);
+      const [tableData] = getCurrentTables(tableId);
+      const player = players[socket.id];
+      const {roomId, table} = tableData;
+      console.log(table);
+      table.addPlayer(player);
+      socket.emit(TABLE_JOINED, { 
+        tables: getTable(table), 
+        tableId ,socketId:roomId
+      });
+      socket.broadcast.emit(TABLES_UPDATED, getCurrentTables());
+      if(table.players &&
+        table.players.length>0 &&
+        player){
+          let message = `${player.name} joined the table`;
+          broadcastToTable(table, message);
+        }
   });
   socket.on(JOIN_TABLE, (tableId)=>{
     //////This 
