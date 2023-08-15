@@ -61,7 +61,13 @@ function getCurrentTables(tableId){
   //   smallBlind: table.minBet,
   //   bigBlind: table.minBet *2,
   // }));
+};
+const currentTable = (tableId)=>{
+  const [tableData] = getCurrentTables(tableId);
+  const {roomId, table} = tableData;
+  return {roomId, table}
 }
+
 const getTable = (table) => {
     return {
       id: table.id,
@@ -104,16 +110,15 @@ const init = (socket, io)=>{
   });
   socket.on(CREATE_TABLE, ({tableId,limit})=>{
       createNewTable(tableId, socket.id,limit);
-      const [tableData] = getCurrentTables(tableId);
       const player = players[socket.id];
-      const {roomId, table} = tableData;
+      const {roomId, table} = currentTable(tableId);
       console.log(table);
       table.addPlayer(player);
       socket.emit(TABLE_JOINED, { 
         tables: getTable(table), 
         tableId ,socketId:roomId
       });
-      socket.broadcast.emit(TABLES_UPDATED, getCurrentTables());
+      socket.broadcast.emit(TABLES_UPDATED, getTable(table));
       if(table.players &&
         table.players.length>0 &&
         player){
@@ -123,25 +128,24 @@ const init = (socket, io)=>{
   });
   socket.on(JOIN_TABLE, (tableId)=>{
     //////This 
-    const table = tables[tableId]
-    const player = players[socket.id];
-    
-
-    table.addPlayer(player);
-
-    socket.emit(TABLE_JOINED, {tables:getCurrentTables(),tableId});
-    socket.broadcast.emit(TABLES_UPDATED, getCurrentTables());
-    if(
-      tables[tableId].players &&
-      tables[tableId].players.length>0 &&
-      player
-    ){
-      let message =  `${player.name} joined the table`;
-      broadcastToTable(table,message);
+    if(room.find((e)=>e.table.id=== tableId)){
+      const [tableData] = getCurrentTables(tableId);
+      const {roomId, table} = tableData;
+      socket.emit(TABLE_JOINED, { 
+        tables: getTable(table), 
+        tableId,socketId:roomId 
+      });
+      socket.broadcast.emit(TABLES_UPDATED, getTable(table));
+      const player = players[socket.id];
+      if(table.players &&
+        table.players.length>0&& player){
+          let message = `${player.name} joined the table`;
+          broadcastToTable(table,message)
+        }
     }
   });
   socket.on(LEAVE_TABLE, (tableId)=>{
-    const table = tables[tableId];
+    const {roomId, table } = currentTable(tableId);
     const player = players[socket.id];
     const seat = Object.values(table.seats).find(
       (seat)=> seat && seat.player.socketId === socket.id,
@@ -150,11 +154,11 @@ const init = (socket, io)=>{
       updatePlayerBankroll(player, seat.stack);
     }
     table.removePlayer(socket.id);
-    socket.broadcast.emit(TABLES_UPDATED, getCurrentTables());
-    socket.emit(TABLE_LEFT, {table:getCurrentTables(), tableId});
+    socket.broadcast.emit(TABLES_UPDATED, getTable(table));
+    socket.emit(TABLE_LEFT, {table:getTable(table), tableId});
     if(
-      tables[tableId].players &&
-      tables[tableId].players.length> 0 &&
+      table.players &&
+      table.players.length> 0 &&
       player
     ){
       let message = `${player.name} left the table.`;
@@ -165,40 +169,40 @@ const init = (socket, io)=>{
     }
   });
  socket.on(FOLD, (tableId) => {
-   let table = tables[tableId];
+   let {roomId, table} = currentTable(tableId);
    let res = table.handleFold(socket.id);
    res && broadcastToTable(table, res.message);
    res && changeTurnAndBroadcast(table, res.seatId);
  });
 
  socket.on(CHECK, (tableId) => {
-   let table = tables[tableId];
+   let { roomId, table } = currentTable(tableId);
    let res = table.handleCheck(socket.id);
    res && broadcastToTable(table, res.message);
    res && changeTurnAndBroadcast(table, res.seatId);
  });
 
  socket.on(CALL, (tableId) => {
-   let table = tables[tableId];
+   let { roomId, table } = currentTable(tableId);
    let res = table.handleCall(socket.id);
    res && broadcastToTable(table, res.message);
    res && changeTurnAndBroadcast(table, res.seatId);
  });
 
  socket.on(RAISE, ({ tableId, amount }) => {
-   let table = tables[tableId];
+   let { roomId, table } = currentTable(tableId);
    let res = table.handleRaise(socket.id, amount);
    res && broadcastToTable(table, res.message);
    res && changeTurnAndBroadcast(table, res.seatId);
  });
 
  socket.on(TABLE_MESSAGE, ({ message, from, tableId }) => {
-   let table = tables[tableId];
+   let { roomId, table } = currentTable(tableId);
    broadcastToTable(table, message, from);
  });
 
  socket.on(SIT_DOWN, ({ tableId, seatId, amount }) => {
-   const table = tables[tableId];
+   let { roomId, table } = currentTable(tableId);
    const player = players[socket.id];
 
    if (player) {
@@ -215,7 +219,7 @@ const init = (socket, io)=>{
  });
 
  socket.on(REBUY, ({ tableId, seatId, amount }) => {
-   const table = tables[tableId];
+   let { roomId, table } = currentTable(tableId);
    const player = players[socket.id];
 
    table.rebuyPlayer(seatId, amount);
@@ -225,7 +229,7 @@ const init = (socket, io)=>{
  });
 
  socket.on(STAND_UP, (tableId) => {
-   const table = tables[tableId];
+   let {roomId, table} = currentTable(tableId);
    const player = players[socket.id];
    const seat = Object.values(table.seats).find(
      (seat) => seat && seat.player.socketId === socket.id
@@ -246,7 +250,7 @@ const init = (socket, io)=>{
  });
 
  socket.on(SITTING_OUT, ({ tableId, seatId }) => {
-   const table = tables[tableId];
+   let { roomId, table } = currentTable(tableId);
    const seat = table.seats[seatId];
    seat.sittingOut = true;
 
@@ -254,7 +258,7 @@ const init = (socket, io)=>{
  });
 
  socket.on(SITTING_IN, ({ tableId, seatId }) => {
-   const table = tables[tableId];
+   let { roomId, table } = currentTable(tableId);
    const seat = table.seats[seatId];
    seat.sittingOut = false;
 
@@ -273,7 +277,7 @@ const init = (socket, io)=>{
    delete players[socket.id];
    removeFromTables(socket.id);
 
-   socket.broadcast.emit(TABLES_UPDATED, getCurrentTables());
+   socket.broadcast.emit(TABLES_UPDATED, room);
    socket.broadcast.emit(PLAYERS_UPDATED, getCurrentPlayers());
  });
 
@@ -288,20 +292,32 @@ const init = (socket, io)=>{
 
  function findSeatBySocketId(socketId) {
    let foundSeat = null;
-   Object.values(tables).forEach((table) => {
-     Object.values(table.seats).forEach((seat) => {
-       if (seat && seat.player.socketId === socketId) {
-         foundSeat = seat;
-       }
-     });
-   });
+  //  Object.values(tables).forEach((table) => {
+  //    Object.values(table.seats).forEach((seat) => {
+  //      if (seat && seat.player.socketId === socketId) {
+  //        foundSeat = seat;
+  //      }
+  //    });
+  //  });
+  room.forEach((tableData)=>{
+    let {roomId, table} = tableData;
+    table.seats.forEach((seat)=>{
+      if(seat && seat.player.socketId === socketId){
+        foundSeat =seat;
+      }
+    })
+  })
    return foundSeat;
  }
 
  function removeFromTables(socketId) {
-   for (let i = 0; i < Object.keys(tables).length; i++) {
-     tables[Object.keys(tables)[i]].removePlayer(socketId);
-   }
+  //  for (let i = 0; i < Object.keys(tables).length; i++) {
+  //    tables[Object.keys(tables)[i]].removePlayer(socketId);
+  //  }
+  room.forEach((tableData)=>{
+    let {roomId, table} = tableData;
+    table.removePlayer(socketId);
+  })
  }
 
  function broadcastToTable(table, message = null, from = null) {
