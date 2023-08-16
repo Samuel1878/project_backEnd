@@ -122,21 +122,22 @@ const init = (socket, io)=>{
       if(table.players &&
         table.players.length>0 &&
         player){
-          let message = `${player.name} joined the table`;
+          let message = `${player.name} created the table`;
           broadcastToTable(table, message);
         }
   });
   socket.on(JOIN_TABLE, (tableId)=>{
     //////This 
     if(room.find((e)=>e.table.id=== tableId)){
-      const [tableData] = getCurrentTables(tableId);
-      const {roomId, table} = tableData;
+      const {roomId, table} = currentTable(tableId);
+      const player = players[socket.id];
+      table.addPlayer(player);
       socket.emit(TABLE_JOINED, { 
         tables: getTable(table), 
         tableId,socketId:roomId 
       });
       socket.broadcast.emit(TABLES_UPDATED, getTable(table));
-      const player = players[socket.id];
+      
       if(table.players &&
         table.players.length>0&& player){
           let message = `${player.name} joined the table`;
@@ -153,7 +154,7 @@ const init = (socket, io)=>{
     if(seat && player){
       updatePlayerBankroll(player, seat.stack);
     }
-    table.removePlayer(socket.id);
+    table?.removePlayer(socket.id);
     socket.broadcast.emit(TABLES_UPDATED, getTable(table));
     socket.emit(TABLE_LEFT, {table:getTable(table), tableId});
     if(
@@ -162,7 +163,7 @@ const init = (socket, io)=>{
       player
     ){
       let message = `${player.name} left the table.`;
-      broadcastToTable(table, message);
+      broadcastToTable(table, message,roomId);
     }
     if(table.activePlayers().length === 1){
       clearForOnePlayer(table);
@@ -202,7 +203,7 @@ const init = (socket, io)=>{
  });
 
  socket.on(SIT_DOWN, ({ tableId, seatId, amount }) => {
-   let { roomId, table } = currentTable(tableId);
+   const { roomId, table } = currentTable(tableId);
    const player = players[socket.id];
 
    if (player) {
@@ -320,15 +321,17 @@ const init = (socket, io)=>{
   })
  }
 
- function broadcastToTable(table, message = null, from = null) {
+ function broadcastToTable(table, message = null, from=null ) {
+  console.log(message)
    for (let i = 0; i < table.players.length; i++) {
      let socketId = table.players[i].socketId;
      let tableCopy = hideOpponentCards(table, socketId);
      io.to(socketId).emit(TABLE_UPDATED, {
        table: tableCopy,
        message,
-       from,
+      from
      });
+    
    }
  }
 
