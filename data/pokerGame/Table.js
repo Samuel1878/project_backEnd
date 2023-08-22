@@ -6,7 +6,7 @@ import pokerSolver from "pokersolver";
 import _ from "underscore";
 var Hand = pokerSolver.Hand;
 class Table {
-  constructor(id, name, limit, maxPlayers = 9) {
+  constructor(id, name, limit, maxPlayers = 7) {
     this.id = id;
     this.name = name;
     this.limit = limit;
@@ -235,7 +235,7 @@ class Table {
     })
   }
   cleanSeatsForHistory() {
-    const cleanSeats = JSON.pare(JSON.stringify(this.seats));
+    const cleanSeats = JSON.parse(JSON.stringify(this.seats));
     for (let i = 0; i< this.maxPlayers; i++){
         const seat = cleanSeats[i];
         if(seat){
@@ -255,7 +255,7 @@ class Table {
         this.endWithoutShowdown();
         return;
     }
-    if(this.actionIsCOmmplete()){
+    if(this.actionIsCommplete()){
         this.calculateSidePots();
         while(this.board.length <= 5 && !this.handOver){
             this.dealNextStreet();

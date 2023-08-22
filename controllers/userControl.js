@@ -18,7 +18,6 @@ const userData = {
             }
         )
        }
-
        if (data){
         switch (reqData) {
           case "chip":
