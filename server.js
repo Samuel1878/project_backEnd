@@ -23,7 +23,7 @@ configRoutes(app);
   db = await connectDB();
 })()
 //start server and listen for connections
-httpServer.listen(process.env.PORT,process.env.HOST, (err) => {
+httpServer.listen(process.env.PORT|| 80, (err) => {
   if (err) console.log(err);
   logger.info(`A server is runing at ${process.env.HOST, process.env.PORT}`);
 });

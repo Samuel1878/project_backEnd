@@ -1,8 +1,7 @@
-env/
-node_modules/
+
 # dependencies
 /node_modules
-/.env
+##/.env
 
 #from Server
 
