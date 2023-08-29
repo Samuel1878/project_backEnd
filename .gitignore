@@ -3,7 +3,6 @@ node_modules/
 # dependencies
 /node_modules
 /.env
-/package.json
-/package-lock.json
+
 #from Server
 

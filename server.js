@@ -23,9 +23,9 @@ configRoutes(app);
   db = await connectDB();
 })()
 //start server and listen for connections
-httpServer.listen(process.env.PORT, (err) => {
+httpServer.listen(process.env.PORT,process.env.HOST, (err) => {
   if (err) console.log(err);
-  logger.info(`A server is runing at ${process.env.PORT}`);
+  logger.info(`A server is runing at ${process.env.HOST, process.env.PORT}`);
 });
 
 //handle real-time poker game logic with socket.io
